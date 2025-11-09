@@ -28,7 +28,7 @@ import java.util.List;
  * Spring Boot 시작 시 REGION 테이블 데이터를 초기화하는 메인 로직
  * (image_8ea202.png / image_f_06fd.png 엑셀 파일 기준)
  */
-@Component
+//@Component
 @RequiredArgsConstructor // 'final' 필드 생성자를 자동으로 만듭니다.
 public class RegionDataInitializer implements CommandLineRunner {
 
