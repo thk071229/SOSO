@@ -1,162 +1,134 @@
-package com.kh.soso.batch;
+package com.kh.soso.service; // service 패키지
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.HashMap; // ★ HashMap import
 import java.util.List;
+import java.util.Map; // ★ Map import
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional; // ★ Transactional
 import org.springframework.web.client.RestTemplate;
 
-// (Spring 및 Java 라이브러리 import)
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kh.soso.dao.RegionDao;
-// (우리가 만든 클래스 import)
 import com.kh.soso.dto.RegionDto;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Spring Boot 시작 시 REGION 테이블 데이터를 초기화하는 메인 로직 (JdbcTemplate 통일)
- */
-@Component
+@Service
 @RequiredArgsConstructor 
-public class RegionInitializer implements CommandLineRunner {
+public class RegionService {
 
-    // (JdbcTemplate 기반의 RegionDao를 주입받습니다.)
     private final RegionDao regionDao; 
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper(); 
 
     @Value("${kakao.api.key}")
     private String kakaoApiKey;
-    
-
-    @Override
-    public void run(String... args) throws Exception {
-        System.out.println("=========================================");
-        System.out.println("[RegionInitializer] 데이터베이스 초기화 시작 (JdbcTemplate)...");
-        
-        // 1단계: 엑셀 파일을 읽어 DB에 INSERT 합니다. (배치)
-        step1_InsertBaseData();
-        
-        // 2단계: 좌표가 없는 데이터를 찾아 Kakao API로 UPDATE 합니다.
-        step2_UpdateCoordinates();
-        
-        System.out.println("[RegionInitializer] 모든 작업 완료.");
-        System.out.println("=========================================");
-    }
 
     /**
-     * [1단계] 공공데이터 파일을 읽어 JdbcTemplate으로 INSERT 합니다.
+     * [1단계] 공공데이터 파일을 읽어 DB에 INSERT 합니다.
+     * (Map을 사용해 중복 PK 데이터를 제거하는 로직으로 수정)
      */
-    private void step1_InsertBaseData() throws Exception {
+    @Transactional // ★[필수] 1단계 작업이 실패하면 모두 롤백(Rollback)합니다.
+    public String step1_setupRegionData() throws Exception {
         // [안전 장치] DB에 데이터가 이미 있으면 건너뜁니다.
         if (regionDao.count() > 0) {
             System.out.println("[INFO] 1단계: REGION 기본 데이터가 이미 존재하여 건너뜁니다.");
-            return;
+            return "[INFO] 1단계: REGION 기본 데이터가 이미 존재하여 건너뜁니다.";
         }
 
         System.out.println("[INFO] 1단계: 'region_code.txt' 파일 읽기 시작...");
         
+        // ★[수정] DTO를 담을 Map 생성 (Key: regionNo, Value: RegionDto)
+        // Map을 사용하면 'regionNo' (PK)가 중복될 경우, 자동으로 덮어쓰기(중복 제거)
+        Map<Long, RegionDto> regionMap = new HashMap<>();
+        
         ClassPathResource resource = new ClassPathResource("region_code.txt");
         
-        int insertedCount = 0;
         int skippedCount = 0;
         int headerCount = 0;
+        int duplicateCount = 0; // 중복 카운트용
 
         // (엑셀에서 저장한 .txt 파일은 "EUC-KR" 인코딩입니다)
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), "EUC-KR"))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 
-                // [★최종 수정★] 엑셀에서 저장한 .txt는 "\t" (탭)으로 구분됩니다.
                 String[] parts = line.split("\t", -1); 
                 
-                // [필터 1: 컬럼 수]
-                if (parts.length < 8) { 
-                    skippedCount++;
-                    continue; 
-                }
+                if (parts.length < 8) { skippedCount++; continue; }
                 
-                // (엑셀 컬럼 순서(image_8f06fd.png)에 맞춰서 데이터를 추출합니다)
                 String codeStr = parts[4]; // (E) 주소코드 -> PK
                 String depth1 = parts[1]; // (B) 시도명
                 String depth2 = parts[2]; // (C) 시군구명
                 String depth3 = parts[5]; // (F) 동리명
                 String abolishDate = parts[7]; // (H) 말소일자
                 
-                // [필터 2: 헤더] "행정코드"라는 글자가 있으면 스킵 (엑셀 헤더)
-                if (parts[0].equals("행정코드")) {
-                    headerCount++;
-                    continue;
-                }
-                
-                // [필터 3: "동" 단위] 동리명(parts[5])이 비어있는 데이터는 스킵
-                if (depth3 == null || depth3.trim().isEmpty()) {
-                    skippedCount++;
-                    continue;
-                }
-                
-                // [필터 4: "폐지"된 지역] 말소일자(parts[7])가 비어있지 않은(폐지된) 지역은 스킵
-                if (abolishDate != null && !abolishDate.trim().isEmpty()) {
-                    skippedCount++;
-                    continue;
-                }
+                if (parts[0].equals("행정코드")) { headerCount++; continue; }
+                if (depth3 == null || depth3.trim().isEmpty()) { skippedCount++; continue; }
+                if (abolishDate != null && !abolishDate.trim().isEmpty()) { skippedCount++; continue; }
 
                 try {
-                    // (PK) 주소코드(parts[4])를 Long 타입으로 변환
                     Long code = Long.parseLong(codeStr); 
-                    
-                    // (region_name) "시도 시군구 읍면동"으로 조합
                     String fullName = depth1 + " " + depth2 + " " + depth3;
 
-                    // RegionDto 생성 (JdbcTemplate용 VO)
                     RegionDto regionDto = RegionDto.builder()
                                         .regionNo(code)
                                         .regionName(fullName)
                                         .regionDepth1(depth1)
                                         .regionDepth2(depth2)
                                         .regionDepth3(depth3)
-                                        .build(); // xCoord, yCoord는 NULL
+                                        .build();
                     
-                    // JdbcTemplate을 사용하는 DAO의 insert 메소드 호출
-                    regionDao.insert(regionDto); 
-                    insertedCount++;
+                    // ★[수정] DB에 바로 insert하지 않고 Map에 추가
+                    // regionMap.put(code, regionDto)은 이전에 저장된 값이 있으면 그 값을 반환 (null이 아니면 중복)
+                    if (regionMap.put(code, regionDto) != null) {
+                        duplicateCount++; // 중복 횟수 카운트
+                    }
 
                 } catch (NumberFormatException e) {
-                    // (숫자 변환 실패 시)
                     System.out.println("[WARN] 파싱 오류 (스킵): " + line);
                     skippedCount++;
                 }
             }
         } catch (Exception e) {
             System.err.println("[ERROR] 1단계: 'region_code.txt' 파일 읽기 실패!");
-            System.err.println(" (1) 'src/main/resources'에 파일이 있는지 확인하세요.");
-            System.err.println(" (2) 파일 인코딩(EUC-KR)이 맞는지 확인하세요.");
-            throw e;
+            throw e; // 트랜잭션 롤백을 위해 예외를 던짐
         }
-        System.out.println("[INFO] 1단계: REGION 기본 데이터 삽입 완료.");
-        System.out.println(" (헤더: " + headerCount + "건, 스킵: " + skippedCount + "건, 삽입: " + insertedCount + "건)");
+        
+        // ★[수정] 루프가 끝난 후, Map에 담긴 '중복이 제거된' 데이터만 DB에 삽입
+        System.out.println("[INFO] 1단계: 파일 읽기 완료. 총 " + regionMap.size() + "건의 고유 데이터 DB 삽입 시작...");
+        System.out.println(" (파일 원본: 헤더 " + headerCount + "건, 스킵 " + skippedCount + "건, 중복 " + duplicateCount + "건)");
+
+        for (RegionDto region : regionMap.values()) {
+            // 이제 regionMap.values()에는 PK 중복이 없는 고유한 데이터만 존재
+            regionDao.insert(region);
+        }
+
+        String result = "[INFO] 1단계: REGION 기본 데이터 삽입 완료. (삽입: " + regionMap.size() + "건)";
+        System.out.println(result);
+        return result;
     }
 
     /**
      * [2단계] Kakao API를 호출하여 x, y 좌표를 UPDATE 합니다.
      */
-    private void step2_UpdateCoordinates() throws Exception {
+    public String step2_updateCoordinates() throws Exception {
         // [안전 장치 2] 1. 좌표가 없는(NULL) 지역 목록을 조회
         List<RegionDto> regionsToUpdate = regionDao.findByxCoordIsNull();
         
         if (regionsToUpdate.isEmpty()) {
             System.out.println("[INFO] 2단계: 모든 REGION 좌표가 이미 존재하여 건너뜁니다.");
-            return;
+            return "[INFO] 2단계: 모든 REGION 좌표가 이미 존재하여 건너뜁니다.";
         }
 
         System.out.println("[INFO] 2단계: 총 " + regionsToUpdate.size() + "건의 좌표 업데이트가 필요합니다.");
@@ -190,7 +162,7 @@ public class RegionInitializer implements CommandLineRunner {
                     region.setXCoord(x);
                     region.setYCoord(y);
                     
-                    // 5. DB 업데이트 (JdbcTemplate 사용)
+                    // 5. DB 업데이트
                     regionDao.updateCoordinates(region);
                     updatedCount++;
 
@@ -210,6 +182,8 @@ public class RegionInitializer implements CommandLineRunner {
                 System.err.println("[ERROR] " + region.getRegionName() + " 좌표 업데이트 중 오류: " + e.getMessage());
             }
         }
-        System.out.println("[INFO] 2단계: 좌표 업데이트 완료 (성공: " + updatedCount + "건, 실패: " + failedCount + "건)");
+        String result = "[INFO] 2단계: 좌표 업데이트 완료 (성공: " + updatedCount + "건, 실패: " + failedCount + "건)";
+        System.out.println(result);
+        return result;
     }
 }
