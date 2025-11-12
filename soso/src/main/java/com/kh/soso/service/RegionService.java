@@ -48,7 +48,6 @@ public class RegionService {
 
         System.out.println("[INFO] 1단계: 'region_code.txt' 파일 읽기 시작...");
         
-        // ★[수정] DTO를 담을 Map 생성 (Key: regionNo, Value: RegionDto)
         // Map을 사용하면 'regionNo' (PK)가 중복될 경우, 자동으로 덮어쓰기(중복 제거)
         Map<Long, RegionDto> regionMap = new HashMap<>();
         
