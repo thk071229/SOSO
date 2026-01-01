@@ -1,4 +1,4 @@
-package com.kh.soso;
+package com.project.soso;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
