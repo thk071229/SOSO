@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="attachment">
+
+	<select id="sequence" resultType="Long">
+		select attachment_seq.nextval from dual
+	</select>
+	
+	<insert id="insert">
+		insert into attachment(
+			attachment_no, attachment_name, 
+			attachment_type, attachment_size
+		) 
+		values(
+			#{attachmentNo}, #{attachmentName}, 
+			#{attachmentType}, #{attachmentSize}
+		) 
+	</insert>
+	
+	<select id="detail" resultType="AttachmentDto">
+		select * from attachment where attachment_no = #{attachmentNo}
+	</select>
+	
+	<delete id="delete">
+		delete from attachment where attachment_no = #{attachmentNo}
+	</delete>
+	
+	<update id="edit">
+		update attachment 
+		set 
+		attachment_name = #{attachmentName}, attachment_size = #{attachmentSize}, 
+		attachment_type = #{attachmentType}, attachment_time = systimestamp 
+		where 
+		attachment_no = #{attachmentNo}
+	</update>
+
+</mapper>
