@@ -18,6 +18,19 @@
 		)
 	</insert>
 	
+	<!-- 회원프로필 -->
+	<insert id="connect">
+		insert into account_profile(account_id, attachment_no) 
+		values(
+		#{accountId}, #{attachmentNo}
+		)
+	</insert>
+	
+	<select id="findAttach" resultType="long">
+		select attachment_no from account_profile 
+		where account_id = #{accountId}
+	</select>
+	
 	<!-- 중복 검사 -->
 	<select id="checkDuplicate" resultType="int">
 		select count(*) from account 
