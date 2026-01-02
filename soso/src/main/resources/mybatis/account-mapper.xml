@@ -18,4 +18,83 @@
 		)
 	</insert>
 	
+	<!-- 중복 검사 -->
+	<select id="checkDuplicate" resultType="int">
+		select count(*) from account 
+		<where>
+			<if test="accountId != null">
+				and account_id = #{accountId} 
+			</if>
+			<if test="accountNickname != null">
+				and account_nickname = #{accountNickname} 
+			</if>
+			<if test="accountContact != null">
+				and account_contact = #{accountContact} 
+			</if>
+			<if test="accountEmail != null">
+				and account_email = #{accountEmail}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 회원의 로그인 시간 업데이트 -->
+	<update id="updateLoginTime">
+		update account 
+		set 
+		account_login = systimestamp 
+		where account_id = #{accountId}
+	</update>
+	
+	<update id="edit">
+	    update account 
+	    <set>
+	        <if test="accountPw != null and accountPw != ''">
+	            account_pw = #{accountPw}, 
+	        </if>
+	        
+	        <if test="accountNickname != null and accountNickname != ''">
+	            account_nickname = #{accountNickname}, 
+	        </if>
+	        
+	        <if test="accountEmail != null and accountEmail != ''">
+	            account_email = #{accountEmail}, 
+	        </if>
+	        
+	        <if test="accountBirth != null and accountBirth != ''">
+	            account_birth = #{accountBirth}, 
+	        </if>
+	        
+	        <if test="accountContact != null and accountContact != ''">
+	            account_contact = #{accountContact}, 
+	        </if>
+	        
+	        <if test="accountGender != null and accountGender != ''">
+	            account_gender = #{accountGender}, 
+	        </if>
+	
+	        account_change = systimestamp
+	    </set>
+	    where account_id = #{accountId}
+	</update>
+	
+	<!-- 아이디 찾기(휴대폰, 이메일) -->
+	<select id="findAccountId" resultType="String">
+	    select account_id from account 
+	    <where>
+	        <choose>
+	            <when test="accountContact != null">
+	                account_contact = #{accountContact}
+	            </when>
+	            <when test="accountEmail != null">
+	                account_email = #{accountEmail}
+	            </when>
+	        </choose>
+	    </where>
+	</select>
+	
+	<!-- 회원 상세 조회 -->
+	<select id="detail" resultType="AccountDto">
+		select * from account where account_id = #{accountId}
+	</select>
+	
 </mapper>
