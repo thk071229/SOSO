@@ -45,6 +45,11 @@ public class AccountDao {
 		accountDto.setAccountContact(accountContact);
 		return sqlSession.selectOne("account.checkDuplicate", accountDto);
 	}
+	public int countByAccountEmail(String accountEmail) {
+		AccountDto accountDto = new AccountDto();
+		accountDto.setAccountEmail(accountEmail);
+		return sqlSession.selectOne("account.checkDuplicate", accountDto);
+	}
 	// 로그인 시간 업데이트
 	public void updateLoginTime(String accountId) {
 		sqlSession.update("account.updateLoginTime", accountId);
