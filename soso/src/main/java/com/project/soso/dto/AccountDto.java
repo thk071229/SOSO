@@ -51,5 +51,9 @@ public class AccountDto {
 	private LocalDateTime accountChange;
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SSS")
 	private LocalDateTime accountSubEndDate; // 구독종료시간
+	
+	// (+추가) 약관동의 여부
+	private String accountMarketingAgree;
+	private String accountThirdPartyAgree;
 
 }

@@ -9,12 +9,14 @@
 		insert into account(
 			account_id, account_pw, account_nickname, 
 			account_birth, account_contact, account_email, 
-			account_gender
+			account_gender, account_marketing_agree, 
+			account_third_party_agree
 		) 
 		values(
 			#{accountId}, #{accountPw}, #{accountNickname}, 
 			#{accountBirth}, #{accountContact}, #{accountEmail}, 
-			#{accountGender}
+			#{accountGender}, #{accountMarketingAgree}, 
+			#{accountThirdPartyAgree}
 		)
 	</insert>
 	
