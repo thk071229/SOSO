@@ -25,7 +25,7 @@ public class SecurityConfig {
             // 2. 요청 권한 설정
             .authorizeHttpRequests(auth -> auth
                 // 인증번호, 아이디 중복체크, 로그인 등은 누구나 허용
-                .requestMatchers("/", "/login", "/cert/**", "/api/account/**").permitAll()
+                .requestMatchers("/", "/login", "/cert/**", "/account/**").permitAll()
                 // 그 외 모든 요청은 로그인 필요
                 .anyRequest().authenticated()
             )
