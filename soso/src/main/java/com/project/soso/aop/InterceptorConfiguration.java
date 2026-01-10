@@ -1,12 +1,9 @@
-package com.project.soso;
+package com.project.soso.aop;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import com.project.soso.aop.AccountInterceptor;
-import com.project.soso.aop.TokenRenewalInterceptor;
 
 @Configuration
 public class InterceptorConfiguration implements WebMvcConfigurer{
