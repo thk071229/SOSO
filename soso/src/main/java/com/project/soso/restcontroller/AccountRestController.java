@@ -8,16 +8,21 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.project.soso.dao.AccountDao;
 import com.project.soso.dto.AccountDto;
+import com.project.soso.error.TargetNotfoundException;
 import com.project.soso.service.AccountService;
+import com.project.soso.vo.AccountLoginResponseVO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
@@ -28,6 +33,8 @@ public class AccountRestController {
 	
 	@Autowired
 	private AccountService accountService;
+	@Autowired
+	private AccountDao accountDao;
 	
 	@Operation(
 			summary = "신규 회원 가입", // [1] 짧은 제목
@@ -72,4 +79,37 @@ public class AccountRestController {
 	public boolean checkAccountNickname(@PathVariable String accountNickname) {
 		return accountService.checkAccountNickname(accountNickname);
 	}
+	@Operation(
+			summary = "로그인 (토큰 발급)", 
+			description = "회원의 아이디와 비밀번호를 검증하여 <strong>Access Token</strong>과 <strong>Refresh Token</strong>을 발급합니다.<br>"
+					+ "로그인 성공 시 반환되는 <code>accessToken</code>을 복사하여, 우측 상단 <strong>[Authorize]</strong> 버튼에 등록하면 인증된 상태로 다른 API를 테스트할 수 있습니다.",
+			responses = {
+				@ApiResponse(
+					responseCode = "200", 
+					description = "로그인 성공",
+					content = @Content(
+						mediaType = "application/json", 
+						schema = @Schema(implementation = AccountLoginResponseVO.class)
+					)
+				),
+				@ApiResponse(
+					responseCode = "404", 
+					description = "로그인 실패 (아이디가 없거나 비밀번호가 일치하지 않음)",
+					content = @Content(
+						mediaType = "text/plain",
+						examples = @ExampleObject(value = "로그인 정보 오류")
+					)
+				),
+				@ApiResponse(
+					responseCode = "500", 
+					description = "서버 내부 오류",
+					content = @Content
+				)
+			}
+		)
+	@PostMapping("/login")
+	public AccountLoginResponseVO login(@RequestBody AccountDto accountDto) {
+		return accountService.login(accountDto);
+	}
+	
 }
