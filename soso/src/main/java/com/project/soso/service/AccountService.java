@@ -24,10 +24,12 @@ public class AccountService {
 	private PasswordEncoder passwordEncoder;
 	@Autowired
 	private AttachmentService attachmentService;
+	@Autowired
+	private TokenService tokenService;
 	
 	// 회원가입
 	@Transactional
-	public void join(AccountDto accountDto, MultipartFile attach) throws IllegalStateException, IOException {
+	public String join(AccountDto accountDto, MultipartFile attach) throws IllegalStateException, IOException {
 		// [1] 아이디 중복검사
 		if(accountDao.countByAccountId(accountDto.getAccountId()) > 0)
 			throw new TargetAlreadyExistsException("이미 존재하는 아이디입니다");
@@ -52,6 +54,9 @@ public class AccountService {
 			Long attachmentNo = attachmentService.save(attach);
 			accountDao.connect(accountDto.getAccountId(), attachmentNo);
 		}
+		
+		// 가입된 아이디로 토큰 발급(지역, 카테고리 설정용)
+		return tokenService.generateAccessToken(accountDto);
 	}
 	// 아이디 중복검사
 	public boolean checkAccountId(String accountId) {

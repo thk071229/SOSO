@@ -1,8 +1,11 @@
 package com.project.soso.restcontroller;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -66,10 +69,16 @@ public class AccountRestController {
 			}
 		)
 	@PostMapping("/join")
-	public void join(
+	public ResponseEntity<Map<String, Object>> join(
 			@ModelAttribute AccountDto accountDto,
 			@RequestParam(required = false) MultipartFile attach) throws IllegalStateException, IOException {
-		accountService.join(accountDto, attach);
+		String accessToken = accountService.join(accountDto, attach);
+		
+		Map<String, Object> response = new HashMap<>();
+		response.put("message", "가입 성공");
+		response.put("token", accessToken);
+		
+		return ResponseEntity.ok(response);
 	}
 	// 아이디 중복검사
 	@GetMapping("/accountId/{accountId}")
