@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="accountRegion">
+
+	<!-- 지역 정보 삽입 -->
+	<insert id="connect">
+		insert into account_region(
+			account_id, region_no, region_type
+		) 
+		values(
+			#{accountId}, #{regionNo}, #{regionType}
+		)
+	</insert>
+	
+	<!-- 회원의 지역정보가 존재하는지 여부 -->
+	<select id="findRegionType" resultType="int">
+		select count(*) from account_region 
+		where 
+		account_id = #{accountId} 
+		and 
+		region_type = #{regionType}	
+	</select>
+	
+	<!-- 회원의 지역정보 삭제 -->
+	<delete id="delete">
+		delete from account_region 
+		where 
+		account_id = #{accountId} 
+		and 
+		region_type = #{regionType}
+	</delete>
+
+</mapper>

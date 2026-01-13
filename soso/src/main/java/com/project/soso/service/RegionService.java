@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.project.soso.dao.RegionDao;
 import com.project.soso.vo.RegionVO;
@@ -47,5 +48,19 @@ public class RegionService {
         return this.cachedRegions;
 	}
 	
+	// 회원의 지역정보 등록(여기서 있으면 삭제 후 등록)
+	@Transactional
+	public void insert(String accountId, int regionNo, String regionType) {
+		// 존재여부 확인
+		int result = regionDao.findRegionType(accountId, regionType);
+		
+		// 있다면 삭제
+		if(result > 0) {
+			regionDao.delete(accountId, regionType);
+		}
+		
+		// 등록
+		regionDao.insert(accountId, regionNo, regionType);
+	}
 
 }

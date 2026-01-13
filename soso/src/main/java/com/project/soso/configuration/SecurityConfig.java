@@ -32,7 +32,7 @@ public class SecurityConfig {
                 ).permitAll()
                 
                 // 3. 회원가입/로그인 API
-                .requestMatchers("/account/**", "/cert/**", "/api/**").permitAll()
+                .requestMatchers("/account/**", "/cert/**", "/api/**","/region/**").permitAll()
                 
                 // 그 외 모든 요청은 인증 필요
                 .anyRequest().authenticated()
