@@ -22,9 +22,14 @@ public class InterceptorConfiguration implements WebMvcConfigurer{
 						"/account/edit",
 						"/account/withdraw",
 						"/account/profile",
-						"/region/insert"
+						"/region/insert",
+						"/category/insert",
+						"/account/initial-setup"
 						)
 				.excludePathPatterns();
+		
+		
+		
 		registry.addInterceptor(tokenRenewalInterceptor)
 				.addPathPatterns("/**")
 				.excludePathPatterns(
@@ -32,7 +37,7 @@ public class InterceptorConfiguration implements WebMvcConfigurer{
                          "/account/join",
                          "/account/login",
                          "/account/logout",
-                         "/region/"
+                         "/region/**"
 						);
 		
 	}

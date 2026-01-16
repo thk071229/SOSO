@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="accountCategory">
+
+	<!-- 카테고리 정보 삽입 -->
+	<insert id="connect">
+		insert into account_category(
+			account_id, category_no
+		) 
+		values(
+			#{accountId}, #{categoryNo}
+		)
+	</insert>
+	
+	<delete id="delete">
+		delete from account_category where account_id = #{accountId}
+	</delete>
+	
+	
+
+</mapper>
