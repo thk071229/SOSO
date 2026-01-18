@@ -11,6 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.project.soso.dao.AccountDao;
 import com.project.soso.dto.AccountDto;
 import com.project.soso.error.TargetAlreadyExistsException;
+import com.project.soso.error.TargetNotfoundException;
+import com.project.soso.vo.LoginInfoVO;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -65,6 +67,23 @@ public class AccountService {
 	// 닉네임 중복검사 
 	public boolean checkAccountNickname(String accountNickname) {
 		return accountDao.countByAccountNickname(accountNickname) == 0;
+	}
+	
+	// 헤더 설정용 로그인정보
+	public LoginInfoVO loginInfo(String accountId) {
+		
+		AccountDto accountDto = accountDao.selectOne(accountId);
+		
+		if(accountDto == null) throw new TargetNotfoundException("존재하지 않는 아이디");
+		
+		Long attachmentNo = accountDao.findAttach(accountDto.getAccountId());
+		
+		return LoginInfoVO.builder()
+				.accountId(accountDto.getAccountId())
+				.accountLevel(accountDto.getAccountLevel())
+				.accountNickname(accountDto.getAccountNickname())
+				.attachmentNo(attachmentNo)
+				.build();
 	}
 	
 }

@@ -25,6 +25,7 @@ import com.project.soso.service.AccountService;
 import com.project.soso.service.AuthService;
 import com.project.soso.vo.AccountLoginResponseVO;
 import com.project.soso.vo.AccountRefreshVO;
+import com.project.soso.vo.LoginInfoVO;
 import com.project.soso.vo.TokenVO;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +33,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import retrofit2.http.GET;
 
 @CrossOrigin
 @RestController
@@ -135,6 +137,13 @@ public class AccountRestController {
 	@PostMapping("/refresh")
 	public AccountLoginResponseVO refresh(@RequestBody AccountRefreshVO accountRefreshVO) {
 		return authService.refresh(accountRefreshVO.getRefreshToken());
+	}
+	
+	// 헤더 설정 로그인정보
+	@GetMapping("/profile")
+	public LoginInfoVO profile(
+			@RequestAttribute TokenVO tokenVO) {
+		return accountService.loginInfo(tokenVO.getLoginId());
 	}
 	
 }
