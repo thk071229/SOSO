@@ -44,7 +44,7 @@ public class AttachmentRestController {
 				.header(HttpHeaders.CONTENT_TYPE, attachmentDto.getAttachmentType())
 				.contentLength(attachmentDto.getAttachmentSize())
 				.header(HttpHeaders.CONTENT_DISPOSITION, 
-						ContentDisposition.attachment()
+						ContentDisposition.inline()
 						.filename(attachmentDto.getAttachmentName(), StandardCharsets.UTF_8)
 						.build().toString())
 				.body(resource);

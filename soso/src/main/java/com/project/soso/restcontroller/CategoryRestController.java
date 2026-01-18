@@ -24,7 +24,7 @@ public class CategoryRestController {
 	@Autowired
 	private CategoryService categoryService;
 	
-	@GetMapping("/")
+	@GetMapping("")
 	public List<CategoryVO> selectList(){
 		return categoryService.getCategoryList();
 	}

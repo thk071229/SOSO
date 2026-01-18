@@ -23,7 +23,7 @@ public class RegionRestController {
 	@Autowired
 	private RegionService regionService;
 	
-	@GetMapping("/")
+	@GetMapping("")
 	public List<RegionVO> selectList(){
 		return regionService.getRegionList();
 	}

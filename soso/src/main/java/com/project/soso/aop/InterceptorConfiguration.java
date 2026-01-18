@@ -36,8 +36,10 @@ public class InterceptorConfiguration implements WebMvcConfigurer{
 						 "/account/refresh",
                          "/account/join",
                          "/account/login",
-                         "/account/logout",
-                         "/region/**"
+                         "/region",
+                         "/region/",
+                         "/category/",
+                         "/category"
 						);
 		
 	}

@@ -56,4 +56,6 @@ public class AccountDto {
 	private String accountMarketingAgree;
 	private String accountThirdPartyAgree;
 
+	// 첨부파일 추가
+	private Long attachmentNo;
 }

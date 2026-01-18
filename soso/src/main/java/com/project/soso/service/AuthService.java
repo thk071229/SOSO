@@ -75,9 +75,8 @@ public class AuthService {
 	}
 	// 로그아웃
 	@Transactional
-	public void logout(String bearerToken) {
-		TokenVO tokenVO = tokenService.parse(bearerToken);
-		refreshTokenDao.deleteByTarget(tokenVO.getLoginId());
+	public void logout(String loginId) {
+		refreshTokenDao.deleteByTarget(loginId);
 	}
 
 }

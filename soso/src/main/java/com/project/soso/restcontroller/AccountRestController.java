@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,6 +25,7 @@ import com.project.soso.service.AccountService;
 import com.project.soso.service.AuthService;
 import com.project.soso.vo.AccountLoginResponseVO;
 import com.project.soso.vo.AccountRefreshVO;
+import com.project.soso.vo.TokenVO;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -125,8 +127,8 @@ public class AccountRestController {
 	
 	// 로그아웃
 	@DeleteMapping("/logout")
-	public void logout(@RequestHeader("Authorization") String bearerToken) {
-		authService.logout(bearerToken);
+	public void logout(@RequestAttribute TokenVO tokenVO) {
+		authService.logout(tokenVO.getLoginId());
 	}
 	
 	// 토큰갱신
