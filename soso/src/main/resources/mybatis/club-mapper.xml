@@ -5,12 +5,11 @@
 <mapper namespace="club">
 
 
-	<select id="sequence" resultType="int">
-		select club_seq.nextval from dual
-	</select>
-	
-	
 	<insert id="create">
+		<selectKey keyProperty="clubNo" resultType="int" order="BEFORE">
+			select club_seq.nextval from dual 
+		</selectKey>
+		
 		insert into club(
 			club_no, club_leader, club_name, club_introduce, 
 			region_no, category_no, club_profile, 
