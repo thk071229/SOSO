@@ -14,5 +14,9 @@ public class ClubMemberDto {
 	private String accountId;
 	private String clubMemberRole;
 	private LocalDateTime clubMemberJoin;
+	
+	// 테이블 조인으로 가져온 정보
+	private String accountNickname;
+	private Long attachmentNo;
 
 }

@@ -15,4 +15,8 @@ public class ClubDao {
 	public void create(ClubDto clubDto) {
 		sqlSession.insert("club.create", clubDto);
 	}
+	
+	public ClubDto selectOne(int clubNo) {
+		return sqlSession.selectOne("club.detailByClubNo", clubNo);
+	}
 }

@@ -14,5 +14,26 @@
 			#{clubMemberRole} 
 		)
 	</insert>
+	
+	<!-- 회원 목록 -->
+	<select id="selectListByClubNo" resultType="clubMemberDto">
+	    select 
+	        CM.club_no, 
+	        CM.account_id, 
+	        CM.club_member_role, 
+	        CM.club_member_join, 
+	        A.account_nickname as accountNickname, 
+	        A.attachment_no as attachmentNo 
+	        
+	    from club_member CM 
+	    inner join 
+	        account A on CM.account_id = A.account_id  where 
+	        CM.club_no = #{clubNo} 
+	    order by 
+	        case when CM.club_member_role = '모임장' then 1
+	             when CM.club_member_role = '임원' then 2 
+	             else 3 end, 
+	        CM.club_member_join asc
+	</select>
 
 </mapper>

@@ -21,5 +21,19 @@
 			#{clubMax}, 1, #{clubOpen} 
 		) 
 	</insert>
+	
+	<select id="detailByClubNo" resultType="ClubDto">
+	    SELECT 
+	        C.*, 
+	        R.region_name AS regionName, 
+	        CAT.category_name AS categoryName FROM 
+	        club C
+	    LEFT JOIN 
+	        region R ON C.region_no = R.region_no
+	    LEFT JOIN 
+	        category CAT ON C.category_no = CAT.category_no
+	    WHERE 
+	        C.club_no = #{clubNo}
+	</select>
 
 </mapper>

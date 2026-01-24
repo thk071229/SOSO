@@ -1,5 +1,7 @@
 package com.project.soso.dao;
 
+import java.util.List;
+
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
@@ -14,5 +16,9 @@ public class ClubMemberDao {
 	
 	public void insert(ClubMemberDto clubMemberDto) {
 		sqlSession.insert("clubMember.insert", clubMemberDto);
+	}
+	
+	public List<ClubMemberDto> memberList(int clubNo){
+		return sqlSession.selectList("clubMember.selectListByClubNo", clubNo);
 	}
 }

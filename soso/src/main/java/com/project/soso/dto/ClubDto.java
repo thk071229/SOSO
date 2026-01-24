@@ -20,5 +20,9 @@ public class ClubDto {
 	private int clubCount; // 소모임 현재 인원수
 	private String clubOpen; // 가입방식(Y,N)
 	private LocalDateTime clubCtime; // 생성일
+	
+	// 조인으로 가져온 지역, 카테고리 이름
+	private String regionName;
+	private String categoryName;
 
 }
