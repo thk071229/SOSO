@@ -24,7 +24,8 @@ public class InterceptorConfiguration implements WebMvcConfigurer{
 						"/account/profile",
 						"/region/insert",
 						"/category/insert",
-						"/account/initial-setup"
+						"/account/initial-setup",
+						"/club/**"
 						)
 				.excludePathPatterns();
 		
