@@ -49,7 +49,7 @@ public class ClubRestController {
 			@PathVariable int clubNo,
 			@RequestAttribute(required = false) TokenVO tokenVO) {
 		
-		String loginId = tokenVO.getLoginId();
+		String loginId = (tokenVO == null) ? null : tokenVO.getLoginId();
 		
 		return clubService.getClubDetail(clubNo, loginId);
 	}

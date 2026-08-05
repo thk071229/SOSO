@@ -21,28 +21,43 @@ public class AccountInterceptor implements HandlerInterceptor{
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
+		
 		// [1] OPTIONS 요청 통과
 		if(request.getMethod().equalsIgnoreCase("options")) {
 			return true;
 		}
+		
 		// [2] Authorization 헤더 검사
-		try {// 정상적인 로그인 상태
+		try {
 			String authorization = request.getHeader("Authorization");
-			if(authorization == null)//헤더가 없음 = 비회원
-				throw new UnauthorizationException();//플랜 B로 던져!
 			
-			//토큰 해석
+			// 🚨 [수정 포인트] 헤더가 없을 때 (비회원) 처리 로직 변경
+			if(authorization == null) {
+				String requestURI = request.getRequestURI();
+				
+				// (1) 소모임 상세 페이지나 목록 조회 등 '로그인 없이도 볼 수 있는 페이지'라면?
+				// 그냥 통과시킨다! (이 경우 request에 tokenVO는 없음 -> Controller에서 null이 됨)
+				if(
+					requestURI.startsWith("/club/detail") || 
+					requestURI.startsWith("/club/list") || 
+					requestURI.startsWith("/region") || 
+					requestURI.startsWith("/category")) {
+					return true; 
+				}
+				
+				// (2) 그 외(개설, 마이페이지 등)는 짤없이 차단
+				throw new UnauthorizationException(); 
+			}
+			
+			// [3] 토큰이 있다면 해석 (기존 로직)
 			TokenVO tokenVO = tokenService.parse(authorization);
-			//이어지는 컨트롤러에서 사용 가능하도록 넘기겠다
-			//-> 컨트롤러에서는 @RequestAttribute TokenVO tokenVO로 수신 가능
 			request.setAttribute("tokenVO", tokenVO);
 			return true;
 		}
 		catch (Exception e) {
 			e.printStackTrace();
-			response.sendError(401);//Unauthorized
+			response.sendError(401); // 401 Unauthorized
 			return false;
 		}
 	}
-
 }
